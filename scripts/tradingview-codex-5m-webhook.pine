@@ -1,0 +1,31 @@
+//@version=5
+indicator("Codex 5m Webhook - GC Scalp", overlay=true)
+
+emaLength = input.int(20, "EMA Length", minval=1)
+sendOnly5m = input.bool(true, "Only send on 5m chart")
+sendRealtimeOnly = input.bool(true, "Only send realtime bars")
+
+ema20 = ta.ema(close, emaLength)
+plot(ema20, "EMA20", color=color.new(color.blue, 0), linewidth=2)
+
+isFiveMinuteChart = timeframe.isminutes and timeframe.multiplier == 5
+canSend = barstate.isconfirmed and (not sendOnly5m or isFiveMinuteChart) and (not sendRealtimeOnly or barstate.isrealtime)
+
+payload = "{" +
+  "\"symbol\":\"" + syminfo.ticker + "\"," +
+  "\"exchange\":\"" + syminfo.prefix + "\"," +
+  "\"timeframe\":\"" + timeframe.period + "\"," +
+  "\"time\":" + str.tostring(time) + "," +
+  "\"time_close\":" + str.tostring(time_close) + "," +
+  "\"open\":" + str.tostring(open) + "," +
+  "\"high\":" + str.tostring(high) + "," +
+  "\"low\":" + str.tostring(low) + "," +
+  "\"close\":" + str.tostring(close) + "," +
+  "\"volume\":" + str.tostring(volume) + "," +
+  "\"ema20\":" + str.tostring(ema20) + "," +
+  "\"bar_index\":" + str.tostring(bar_index) + "," +
+  "\"note\":\"bar_close\"" +
+  "}"
+
+if canSend
+    alert(payload, alert.freq_once_per_bar_close)

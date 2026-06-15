@@ -1,0 +1,27 @@
+# 编译产物
+bin/
+obj/
+__pycache__/
+*.pyc
+*.dll
+*.pdb
+
+# 日志
+*.log
+
+# 运行时数据 / 行情快照
+state/
+webhook-data/
+*-bars.json
+*-bars.jsonl
+
+# 本地配置（含真实密钥，禁止提交）
+config.local.json
+*.local.json
+.env
+
+# 系统
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

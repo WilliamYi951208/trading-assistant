@@ -1,0 +1,15 @@
+{
+  "output_dir": "G:\\PriceAction\\交易日志",
+  "data_source": "mcp",
+  "mcp_symbol": "GOLD",
+  "mcp_exchange": "TVC",
+  "mcp_timeframe": "5m",
+  "mcp_poll_interval": 300,
+  "webhook_data_dir": "webhook-data",
+  "log_prefix": "trade-log",
+  "webhook_secret": "",
+  "host": "127.0.0.1",
+  "port": 8787,
+  "methodology": "price_action",
+  "methodology_note": "当前使用 Al Brooks Price Action，后续可扩展 SMC 等"
+}

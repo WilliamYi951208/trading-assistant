@@ -1,0 +1,9 @@
+{
+  "output_dir": "/opt/trading-helper/data",
+  "webhook_data_dir": "/opt/trading-helper/webhook-data",
+  "host": "0.0.0.0",
+  "port": 8787,
+  "webhook_secret": "YOUR_WEBHOOK_SECRET_HERE",
+  "log_prefix": "trade-log",
+  "methodology": "price_action"
+}

@@ -1,0 +1,15 @@
+[Unit]
+Description=TradingView Webhook Receiver
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/trading-helper
+ExecStart=/usr/bin/python3 /opt/trading-helper/webhook_receiver.py
+Restart=always
+RestartSec=5
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target
