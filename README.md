@@ -38,16 +38,16 @@
 ```
 trading-assistant/
 ├── 📄 README.md / README.en.md     # 说明文档（中 / 英）
-├── 📄 SKILL.md                     # Skill 定义（Agent 读取的主文件）
-├── 📄 SKILL-LITE.md                # 精简版 Skill（webhook 快速模式用）
-├── 📄 WEBHOOK_FAST_MODE.md         # Webhook 快速模式说明
-├── 📄 OPENCLAW_INTEGRATION.md      # OpenClaw 集成指南
-├── 📄 smc-reference.md             # SMC 参考手册
-├── 📄 vp-reference.md              # Volume Profile 参考手册
-├── 📁 skill/                       # 可直接安装的 Agent Skill
-│   ├── SKILL.md
-│   └── references/                 # Order Flow / SMC / VP 实战手册
-├── 📁 scripts/                     # 数据采集与服务脚本
+├── 📁 skill/                       # ⭐ 可直接安装的 Agent Skill（核心产物）
+│   ├── SKILL.md                    # 四体系完整版（交易助手 v3.1）
+│   └── references/                 # Order Flow / SMC / VP 实战手册（精简版，供 Agent 调用）
+├── 📁 docs/                        # 📚 说明文档与深度参考
+│   ├── WEBHOOK_FAST_MODE.md        # Webhook 快速模式说明
+│   ├── OPENCLAW_INTEGRATION.md     # OpenClaw 集成指南
+│   ├── smc-reference.md            # SMC 参考手册（详细版，供人阅读）
+│   ├── vp-reference.md             # Volume Profile 参考手册（详细版）
+│   └── legacy/                     # 归档：纯 PA 旧版 Skill（见其 README）
+├── 📁 scripts/                     # 🔧 数据采集与服务脚本
 │   ├── webhook_receiver.py         # Webhook 接收器（HTTP 服务）
 │   ├── fetch_data.py               # MCP 数据拉取
 │   ├── poll-*.py                   # 新 K 轮询
@@ -55,10 +55,13 @@ trading-assistant/
 │   ├── config.vps.json             # VPS 部署配置（模板）
 │   ├── deploy-vps.sh               # VPS 部署脚本
 │   └── *.ps1 / *.bat               # Windows 启动脚本
-└── 📁 atas-indicator/              # ATAS 数据导出指标（C# 源码）
+└── 📁 atas-indicator/              # 📊 ATAS 数据导出指标（C# 源码）
     ├── ClaudeDataExport.cs
     └── ClaudeDataExport.csproj
 ```
+
+> [!TIP]
+> 默认 Skill 是 [`skill/SKILL.md`](skill/SKILL.md)（四体系完整版）。如果只想要**纯 Al Brooks 价格行为**的旧版，见 [`docs/legacy/`](docs/legacy/) 里的说明和替换方法。
 
 ---
 
@@ -75,6 +78,9 @@ cp -r skill ~/.claude/skills/trading-assistant
 # OpenClaw
 cp -r skill ~/.agents/skills/trading-assistant
 ```
+
+> [!TIP]
+> 默认安装的是四体系完整版。想换成**纯 PA 旧版**或**轻量版（无需本地服务器）**，把对应的 `SKILL.md` 覆盖进去即可，详细替换方法见 [`docs/legacy/README.md`](docs/legacy/README.md)。
 
 ### 2️⃣ 配置
 
@@ -237,7 +243,7 @@ dotnet build -c Release
 - ➕ **Order Flow** 在有 Footprint / Delta 数据时叠加
 - ➕ **Volume Profile** 在有成交量分布时叠加
 
-> 详见 [`SKILL.md`](SKILL.md) 与 [`skill/references/`](skill/references/) 下的实战手册。
+> 详见 [`skill/SKILL.md`](skill/SKILL.md) 与 [`skill/references/`](skill/references/) 下的实战手册（深度参考另见 [`docs/`](docs/)）。
 
 ---
 

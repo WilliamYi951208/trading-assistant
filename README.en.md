@@ -38,16 +38,16 @@ An intraday trading assistant for GC (gold futures) on the 5-minute timeframe, b
 ```
 trading-assistant/
 ├── 📄 README.md / README.en.md     # Docs (Chinese / English)
-├── 📄 SKILL.md                     # Skill definition (main file the Agent reads)
-├── 📄 SKILL-LITE.md                # Lite Skill (for webhook fast mode)
-├── 📄 WEBHOOK_FAST_MODE.md         # Webhook fast mode notes
-├── 📄 OPENCLAW_INTEGRATION.md      # OpenClaw integration guide
-├── 📄 smc-reference.md             # SMC reference manual
-├── 📄 vp-reference.md              # Volume Profile reference manual
-├── 📁 skill/                       # Installable Agent Skill
-│   ├── SKILL.md
-│   └── references/                 # Order Flow / SMC / VP field manuals
-├── 📁 scripts/                     # Data collection & service scripts
+├── 📁 skill/                       # ⭐ Installable Agent Skill (the core artifact)
+│   ├── SKILL.md                    # Full four-framework version (Trading Assistant v3.1)
+│   └── references/                 # Order Flow / SMC / VP field manuals (concise, for the Agent)
+├── 📁 docs/                        # 📚 Documentation & in-depth references
+│   ├── WEBHOOK_FAST_MODE.md        # Webhook fast mode notes
+│   ├── OPENCLAW_INTEGRATION.md     # OpenClaw integration guide
+│   ├── smc-reference.md            # SMC reference manual (detailed, for humans)
+│   ├── vp-reference.md             # Volume Profile reference manual (detailed)
+│   └── legacy/                     # Archived: pure-PA legacy Skill (see its README)
+├── 📁 scripts/                     # 🔧 Data collection & service scripts
 │   ├── webhook_receiver.py         # Webhook receiver (HTTP service)
 │   ├── fetch_data.py               # MCP data pull
 │   ├── poll-*.py                   # New-bar polling
@@ -55,10 +55,13 @@ trading-assistant/
 │   ├── config.vps.json             # VPS deployment config (template)
 │   ├── deploy-vps.sh               # VPS deployment script
 │   └── *.ps1 / *.bat               # Windows launch scripts
-└── 📁 atas-indicator/              # ATAS data export indicator (C# source)
+└── 📁 atas-indicator/              # 📊 ATAS data export indicator (C# source)
     ├── ClaudeDataExport.cs
     └── ClaudeDataExport.csproj
 ```
+
+> [!TIP]
+> The default Skill is [`skill/SKILL.md`](skill/SKILL.md) (full four-framework version). If you only want the **pure Al Brooks Price Action** legacy version, see the notes and swap instructions in [`docs/legacy/`](docs/legacy/).
 
 ---
 
@@ -75,6 +78,9 @@ cp -r skill ~/.claude/skills/trading-assistant
 # OpenClaw
 cp -r skill ~/.agents/skills/trading-assistant
 ```
+
+> [!TIP]
+> The default install is the full four-framework version. To switch to the **pure-PA legacy** or **lite (no local server)** version, just overwrite `SKILL.md` with the corresponding file — see [`docs/legacy/README.md`](docs/legacy/README.md) for the swap instructions.
 
 ### 2️⃣ Configure
 
@@ -237,7 +243,7 @@ Four frameworks combined, with the core principle "**use whatever data you have 
 - ➕ **Order Flow** layers in when Footprint / Delta data is available
 - ➕ **Volume Profile** layers in when volume distribution is available
 
-> See [`SKILL.md`](SKILL.md) and the field manuals under [`skill/references/`](skill/references/) for details.
+> See [`skill/SKILL.md`](skill/SKILL.md) and the field manuals under [`skill/references/`](skill/references/) for details (deeper references in [`docs/`](docs/)).
 
 ---
 
