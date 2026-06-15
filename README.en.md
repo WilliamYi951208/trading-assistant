@@ -78,25 +78,84 @@ cp scripts/config.json scripts/config.local.json
 
 > 🔐 **Security note**: The `config.json` / `config.vps.json` files in this repo are templates; fields like `webhook_secret` are placeholders. Replace them with your own secrets when deploying, and never commit configs containing real secrets back to the repo.
 
-### 3. Start the Webhook Receiver
+## Data Ingestion: Two Automatic Modes
+
+The assistant doesn't rely on you pasting bars by hand — it grabs each newly closed bar and analyzes it immediately. Pick either pipeline (or run both); both drop data into `output_dir/bars/` for the Agent to read.
+
+### Mode A: TradingView Webhook (only needs OHLCV + EMA, lowest barrier)
+
+Data flow: **TradingView alert → Pine script builds JSON → HTTP POST to the local receiver → written to the bars dir → Agent analyzes**.
+
+**Step 1: Start the local receiver**
 
 ```bash
 pip install tradingview-ta
 python scripts/webhook_receiver.py
 ```
 
-Listens on `http://127.0.0.1:8787` by default.
+Listens on `http://127.0.0.1:8787` by default. Each received bar is written to `output_dir/bars/` (a day-rotated `bars-YYYY-MM-DD.jsonl` plus a rolling `recent-20-bars.json`).
 
-> ⚠️ **The receiver has no authentication by default.** If you expose it to the public internet (e.g. via ngrok / a VPS), be sure to set `webhook_secret` in the config — the receiver will then validate the `secret` field in each request body.
+**Step 2: Expose the receiver to the internet**
 
-### 4. (Optional) ATAS Data Export
+TradingView alerts can only POST to a public address, so the local port must be tunneled out. ngrok is the simplest:
 
-`atas-indicator/` is the C# source for a custom ATAS platform indicator. Once compiled, it exports real-time OHLCV / Delta / Footprint for the assistant to read. Build it with .NET:
+```bash
+ngrok http 8787
+```
+
+Note the `https://xxxx.ngrok-free.dev` URL it gives you. If you have a VPS, see `scripts/deploy-vps.sh` to deploy it there and skip launching ngrok every time.
+
+> ⚠️ **The receiver has no authentication by default.** Once it's public, be sure to set `webhook_secret` in `config.json` — the receiver will then validate the `secret` field in the request body and drop requests without the correct key.
+
+**Step 3: Attach the Pine script in TradingView**
+
+1. Open a TradingView chart and switch to the **GC 5-minute timeframe**.
+2. Open the Pine editor, paste the full contents of `scripts/tradingview-codex-5m-webhook.pine`, save, and "Add to chart". The script plots an EMA20 and fires an alert on **each confirmed 5m bar close**, with the payload being the assembled JSON (symbol / OHLC / volume / ema20 / bar_index, etc.).
+3. Click **Alerts → Create Alert** on the chart:
+   - For Condition, pick this indicator (`Codex 5m Webhook - GC Scalp`), trigger on **alert() function calls only**;
+   - Set frequency to **Once Per Bar Close**;
+   - Tick **Webhook URL** and enter your Step 2 address + `/webhook`, e.g. `https://xxxx.ngrok-free.dev/webhook`;
+   - Leave the Message empty — the script already sends the JSON via `alert()` internally.
+4. Once the alert is created, data is pushed automatically on every 5m bar close.
+
+> 💡 If you set a `webhook_secret`, the request body needs to carry `secret`. The easiest way is to deploy to a VPS and inject it at the forwarding layer; for a plain ngrok direct connection you can temporarily leave the secret empty and only use it on a local/trusted network.
+
+**Step 4: Run it in the Agent**
+
+Tell the Agent "start trading" (开始做单) — it runs `scripts/poll-new-bar.py` to watch the bars dir, and on every new bar it reads the data and emits a trade recommendation.
+
+### Mode B: ATAS Indicator Export (with Order Flow, richest data)
+
+If you use ATAS for charting, this pipeline additionally captures **Delta / MaxDelta-MinDelta / Footprint** order-flow data — a fuller analysis surface than plain webhook.
+
+Data flow: **ATAS custom indicator → writes local JSON/MD on each bar close → polling script detects the new bar → wakes the Agent to analyze**.
+
+**Step 1: Compile the indicator**
+
+`atas-indicator/` is the C# source for a custom ATAS platform indicator. Build the DLL with .NET:
 
 ```bash
 cd atas-indicator
 dotnet build -c Release
 ```
+
+> The ATAS indicator depends on the platform's bundled `ATAS.Indicators` assembly, so it must be built on a machine that has ATAS installed. The build output lands under `bin/Release/`.
+
+**Step 2: Load the indicator in ATAS**
+
+Drop the compiled `ClaudeDataExport.dll` into the ATAS indicators folder (usually `Documents\ATAS\Indicators`) and restart ATAS. Add the **Claude Data Export** indicator on a GC 5m chart and set the parameters as needed:
+
+- **Output Directory**: the data export directory (defaults to `G:\PriceAction\交易日志\atas` — change it to your own path);
+- **EMA Period**: the EMA period for trend detection (default 20);
+- **Recent Bars Count**: how many bars to keep in the rolling file (default 20).
+
+On each bar close the indicator writes two files: `recent-20-bars.json` (structured OHLCV + Delta data) and `latest-atas-brief.md` (a brief with local pre-analysis).
+
+**Step 3: Run it in the Agent**
+
+Tell the Agent "start trading" (开始做单) — it runs `scripts/poll-atas-bar.py` to watch the ATAS export dir, and when it detects a new bar (via a change in `bar_index`) it wakes up to analyze and emit a recommendation.
+
+> Note: Mode B's export directory must match the `BRIEF_FILE` path in `poll-atas-bar.py` (set both to your actual path).
 
 ## API Endpoints (Webhook Receiver)
 
