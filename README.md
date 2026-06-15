@@ -1,5 +1,7 @@
 # Trading Assistant — 期货日内交易助手
 
+[English](README.en.md) | 简体中文
+
 基于 **Al Brooks 价格行为 (Price Action) + SMC + Order Flow + Volume Profile** 四套体系的 GC（黄金期货）5 分钟日内交易助手。支持实时数据获取、自动盘面分析，并以 Agent Skill 形式跨 Claude Code / Codex / OpenClaw 即插即用。
 
 > ⚠️ **免责声明**：本项目仅用于交易方法论学习与个人工具搭建，不构成任何投资建议。期货交易风险极高，盈亏自负。
